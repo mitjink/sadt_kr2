@@ -18,14 +18,14 @@ class UserCreate(BaseModel):
             raise ValueError('Имя не может быть пустым или состоять только из пробелов')
         return v.strip()
     
-    @field_validator
+    @field_validator('age')
     @classmethod
     def validate_age(cls, v: Optional[int]) -> Optional[int]:
         if v is not None and v <= 0:
             raise ValueError('Возраст должен быть положительным числом')
         return v
     
-app.post("/create_user", response_model=UserCreate)
+@app.post("/create_user", response_model=UserCreate)
 async def create_user(user: UserCreate):
     return user
 
