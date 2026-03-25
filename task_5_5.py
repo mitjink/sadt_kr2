@@ -5,11 +5,7 @@ from datetime import datetime, timezone
 import re
 import uvicorn
 
-app = FastAPI(
-    title="Headers API - Задание 5.4",
-    version="1.0.0",
-    description="API для работы с HTTP заголовками"
-)
+app = FastAPI(title="Задание 5.5")
 
 class CommonHeaders(BaseModel):
     user_agent: str = Header(
@@ -62,28 +58,34 @@ async def get_headers_model(
 
 @app.get("/info")
 async def get_info(
-    headers: CommonHeaders = Depends(),
+    user_agent: Optional[str] = Header(None, alias="User-Agent"),
+    accept_language: Optional[str] = Header(None, alias="Accept-Language"),
     response: Response = None
 ):
+    if not user_agent:
+        raise HTTPException(status_code=400, detail="Missing User-Agent header")
+    if not accept_language:
+        raise HTTPException(status_code=400, detail="Missing Accept-Language header")
+    
+    pattern = r'^[a-zA-Z\-*]+(;[qQ]=[0-9.]+)?(,[a-zA-Z\-*]+(;[qQ]=[0-9.]+)?)*$'
+    simple_pattern = r'^[a-zA-Z\-*]+(,[a-zA-Z\-*]+)*$'
+    
+    if not re.match(pattern, accept_language) and not re.match(simple_pattern, accept_language):
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Invalid Accept-Language format: {accept_language}"
+        )
+    
     current_time = datetime.now(timezone.utc).isoformat(timespec='seconds')
     response.headers["X-Server-Time"] = current_time
     
     return {
         "message": "Добро пожаловать! Ваши заголовки успешно обработаны.",
         "headers": {
-            "User-Agent": headers.user_agent,
-            "Accept-Language": headers.accept_language
+            "User-Agent": user_agent,
+            "Accept-Language": accept_language
         },
         "server_time": current_time
-    }
-
-@app.get("/all-headers")
-async def get_all_headers(request: Request):
-    headers_dict = dict(request.headers)
-    
-    return {
-        "total_headers": len(headers_dict),
-        "headers": headers_dict
     }
 
 @app.get("/parse-language")
@@ -182,4 +184,4 @@ async def headers_demo(request: Request):
 
 
 if __name__ == "__main__":
-    uvicorn.run("task_5_4:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("task_5_5:app", host="0.0.0.0", port=8000, reload=True)

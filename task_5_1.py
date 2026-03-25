@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from typing import Optional
 import uuid
 from datetime import datetime
+import uvicorn
 
 app = FastAPI(title="Задание 5.1")
 
@@ -61,3 +62,6 @@ async def logout(response: Response, session_token: Optional[str] = Cookie(None)
         del sessions[session_token]
     response.delete_cookie(key="session_token")
     return {"message": "Logout successful"}
+
+if __name__ == "__main__":
+    uvicorn.run("task_5_1:app", host="0.0.0.0", port=8000, reload=True)

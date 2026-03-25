@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Query
 from typing import Optional, List
 from pydantic import BaseModel
+import uvicorn
 
 app = FastAPI(title="Задание 3.2")
 
@@ -18,14 +19,14 @@ class Product(BaseModel):
     category: str
     price: float
     
-app.get("/product/{product_id}", response_model=Product)
+@app.get("/product/{product_id}", response_model=Product)
 async def get_product(product_id: int):
     for product in products:
         if product["product_id"] == product_id:
             return product
     raise HTTPException(status_code=404, detail="Product not found")
 
-app.get("/products/search", response_model=List[Product])
+@app.get("/products/search", response_model=List[Product])
 async def search_products(
     keyword: str = Query(..., min_length=1, description="Ключевое слово для поиска"),
     category: Optional[str] = Query(None, description="Категория для фильтрации"),
@@ -37,3 +38,6 @@ async def search_products(
             if category is None or product["category"].lower() == category.lower():
                 results.append(product)
     return results[:limit]
+
+if __name__ == "__main__":
+    uvicorn.run("task_3_2:app", host="0.0.0.0", port=8002, reload=True)

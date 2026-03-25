@@ -4,6 +4,7 @@ from typing import Optional
 import uuid
 from itsdangerous import URLSafeTimedSerializer, BadSignature, SignatureExpired
 from datetime import datetime
+import uvicorn
 
 app = FastAPI(title="Задание 5.2")
 
@@ -70,3 +71,6 @@ async def get_profile(current_user: dict = Depends(get_current_user)):
         "message": "Profile information",
         "user": current_user
     }
+    
+if __name__ == "__main__":
+    uvicorn.run("task_5_2:app", host="0.0.0.0", port=8000, reload=True)

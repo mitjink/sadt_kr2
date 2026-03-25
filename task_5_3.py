@@ -6,6 +6,7 @@ import hmac
 import hashlib
 import time
 from datetime import datetime
+import uvicorn
 
 app = FastAPI(title="Задание 5.3")
 
@@ -143,3 +144,6 @@ async def get_session_info(session_token: Optional[str] = Cookie(None)):
         "expired": is_session_expired(timestamp, current_time),
         "should_update": should_update_session(timestamp, current_time)
     }
+    
+if __name__ == "__main__":
+    uvicorn.run("task_5_3:app", host="0.0.0.0", port=8000, reload=True)
